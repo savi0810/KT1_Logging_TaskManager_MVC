@@ -1,0 +1,81 @@
+﻿@model KT1_Logging_TaskManager_MVC.Models.CurrentTasks
+
+@{
+    ViewData["Title"] = "Task Details";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-purple-light">
+                <div class="card-header bg-white border-bottom border-purple-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 text-purple d-flex align-items-center">
+                            <i class="fas fa-info-circle me-2"></i>Task Details
+                        </h4>
+                        <div class="d-flex">
+                            <a class="btn btn-edit action-btn me-2" asp-action="Edit" asp-route-id="@Model.Id" title="Edit Task">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a class="btn btn-outline-secondary btn-sm" asp-action="Index">
+                                <i class="fas fa-arrow-left me-1"></i>Back
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">@Model.TaskName</h5>
+                        @if (Model.Priority == "High")
+                        {
+                            <span class="badge bg-danger task-badge">High Priority</span>
+                        }
+                        else if (Model.Priority == "Medium")
+                        {
+                            <span class="badge bg-warning text-dark task-badge">Medium Priority</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success task-badge">Low Priority</span>
+                        }
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-purple mb-2">Description</h6>
+                        <p class="task-description">
+                            @if (!string.IsNullOrEmpty(Model.TaskDescription))
+                            {
+                                @Model.TaskDescription
+                            }
+                            else
+                            {
+                                <span class="text-muted">No description provided</span>
+                            }
+                        </p>
+                    </div>
+
+                    <div class="row">
+                        @if (Model.DueDate.HasValue)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <h6 class="fw-bold text-purple mb-2">Due Date</h6>
+                                <p class="task-meta">
+                                    <i class="fas fa-calendar-alt me-2"></i>
+                                    @Model.DueDate.Value.ToString("MMMM dd, yyyy")
+                                </p>
+                            </div>
+                        }
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold text-purple mb-2">Created Date</h6>
+                            <p class="task-meta">
+                                <i class="fas fa-calendar-plus me-2"></i>
+                                @Model.CreatedDate.ToString("MMMM dd, yyyy")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

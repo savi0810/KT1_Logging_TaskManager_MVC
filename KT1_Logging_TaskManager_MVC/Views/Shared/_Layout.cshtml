@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Task Manager</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" asp-controller="CurrentTasks" asp-action="Index">
+                    <i class="fas fa-tasks me-2 fs-4"></i>
+                    <span class="fs-4">Task Manager</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item mx-2">
+                            <a class="nav-link text-white fw-medium fs-5 d-flex align-items-center"
+                               asp-controller="CurrentTasks" asp-action="Index">
+                                <i class="fas fa-list-check me-2"></i>Current
+                            </a>
+                        </li>
+                        <li class="nav-item mx-2">
+                            <a class="nav-link text-white fw-medium fs-5 d-flex align-items-center"
+                               asp-controller="CompletedTasks" asp-action="Index">
+                                <i class="fas fa-check-circle me-2"></i>Completed
+                            </a>
+                        </li>
+                        <li class="nav-item mx-2">
+                            <a class="nav-link text-white fw-medium fs-5 d-flex align-items-center"
+                               asp-controller="OverdueTasks" asp-action="Index">
+                                <i class="fas fa-clock me-2"></i>Overdue
+                            </a>
+                        </li>
+                        <li class="nav-item mx-2">
+                            <a class="nav-link text-white fw-medium fs-5 d-flex align-items-center"
+                               asp-controller="DeletedTasks" asp-action="Index">
+                                <i class="fas fa-trash me-2"></i>Deleted
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="navbar-right d-none d-lg-block" style="width: 140px;"></div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container py-4">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted py-3 mt-5">
+        <div class="container text-center">
+            &copy; 2026 - Task Manager
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

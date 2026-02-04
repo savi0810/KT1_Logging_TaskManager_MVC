@@ -1,0 +1,350 @@
+/* Основные стили */
+html {
+    font-size: 14px;
+    overflow-y: scroll;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    margin-bottom: 60px;
+    padding-top: 0;
+}
+
+/* Фиолетовая тема */
+:root {
+    --primary-purple: #7c3aed;
+    --dark-purple: #5b21b6;
+    --light-purple: #8b5cf6;
+    --lighter-purple: #c4b5fd;
+}
+
+/* Фиолетовый цвет для навигации */
+.bg-primary {
+    background-color: var(--primary-purple) !important;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.2s ease;
+    padding: 0.5rem 1rem !important;
+    border-radius: 6px;
+    margin: 0 0.25rem;
+}
+
+    .navbar-dark .navbar-nav .nav-link:hover,
+    .navbar-dark .navbar-nav .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white !important;
+        transform: translateY(-1px);
+    }
+
+/* Фиолетовые кнопки и элементы */
+.text-purple {
+    color: var(--primary-purple) !important;
+}
+
+.border-purple {
+    border-color: var(--primary-purple) !important;
+}
+
+.border-purple-light {
+    border-color: var(--lighter-purple) !important;
+}
+
+.btn-purple {
+    background: linear-gradient(135deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
+    border-color: var(--primary-purple) !important;
+    color: white !important;
+    transition: all 0.2s ease;
+}
+
+    .btn-purple:hover {
+        background: linear-gradient(135deg, var(--light-purple) 0%, var(--primary-purple) 100%);
+        border-color: var(--light-purple) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+
+.btn-outline-purple {
+    color: var(--primary-purple) !important;
+    border-color: var(--primary-purple) !important;
+    transition: all 0.2s ease;
+}
+
+    .btn-outline-purple:hover {
+        background-color: var(--primary-purple) !important;
+        color: white !important;
+        transform: translateY(-1px);
+    }
+
+/* Стили для форм */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--light-purple);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        outline: none;
+    }
+
+/* Стили для карточек задач */
+.task-card {
+    position: relative;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+    .task-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.06) !important;
+    }
+
+/* Индикаторы статуса */
+.task-status-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    border-radius: 12px 0 0 12px;
+    transition: all 0.3s ease;
+}
+
+.status-green {
+    background: linear-gradient(180deg, #10b981, #34d399);
+}
+
+.status-yellow {
+    background: linear-gradient(180deg, #f59e0b, #fbbf24);
+}
+
+.status-orange {
+    background: linear-gradient(180deg, #f59e0b, #fb923c);
+}
+
+.status-red {
+    background: linear-gradient(180deg, #ef4444, #f87171);
+}
+
+/* Цвета для разных типов карточек */
+.border-success-light {
+    border-color: #d1fae5 !important;
+}
+
+.border-warning-light {
+    border-color: #fef3c7 !important;
+}
+
+.border-danger-light {
+    border-color: #fee2e2 !important;
+}
+
+/* Адаптивная сетка для карточек */
+.tasks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Стили для заголовков страниц */
+.page-title {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--dark-purple);
+    position: relative;
+    display: inline-block;
+}
+
+/* Стили для карточек с содержимым */
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.4;
+}
+
+/* Стили для текста карточек */
+.task-description {
+    color: #6b7280;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.task-meta {
+    font-size: 0.875rem;
+    color: #9ca3af;
+}
+
+/* Стили для кнопок действий */
+.task-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1px solid;
+}
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+
+/* Цвета для кнопок действий */
+.btn-view {
+    color: #4f46e5;
+    border-color: #e0e7ff;
+    background-color: #e0e7ff;
+}
+
+    .btn-view:hover {
+        background-color: #c7d2fe;
+    }
+
+.btn-edit {
+    color: var(--primary-purple);
+    border-color: #f3e8ff;
+    background-color: #f3e8ff;
+}
+
+    .btn-edit:hover {
+        background-color: #e9d5ff;
+    }
+
+.btn-complete {
+    color: #10b981;
+    border-color: #d1fae5;
+    background-color: #d1fae5;
+}
+
+    .btn-complete:hover {
+        background-color: #a7f3d0;
+    }
+
+.btn-delete {
+    color: #ef4444;
+    border-color: #fee2e2;
+    background-color: #fee2e2;
+}
+
+    .btn-delete:hover {
+        background-color: #fecaca;
+    }
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* Улучшенный фокус для доступности */
+*:focus {
+    outline: 2px solid rgba(139, 92, 246, 0.5);
+    outline-offset: 2px;
+}
+
+/* Стили для пустого состояния */
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: #6b7280;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .tasks-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .navbar-nav {
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+        .navbar-nav .nav-item {
+            margin: 0.25rem 0;
+        }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .task-actions {
+        justify-content: center;
+    }
+}
+
+/* Убираем стандартные тени фокуса Bootstrap и заменяем своими */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+}
+
+/* Плавные переходы для всех интерактивных элементов */
+.btn, .nav-link, .task-card, .form-control, .form-select {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Стили для бейджей в карточках */
+.task-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+}
+
+/* Градиенты для фонов карточек при наведении */
+.task-card:hover .task-status-indicator {
+    width: 8px;
+}
+
+/* Плавный скролл */
+html {
+    scroll-behavior: smooth;
+}
