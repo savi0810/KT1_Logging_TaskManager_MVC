@@ -40,3 +40,7 @@
 
 
 <img width="1404" height="1270" alt="Снимок экрана 2026-02-04 205219" src="https://github.com/user-attachments/assets/4615f1c4-07e2-4f63-91e5-493308e22a49" />
+
+## обновленные логи с трессировкой и замером времени операций
+
+<img width="2099" height="1311" alt="image" src="https://github.com/user-attachments/assets/482a6bd1-c361-463b-9c0f-af6f7ed1658a" />
