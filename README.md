@@ -44,3 +44,7 @@
 ## обновленные логи с трессировкой и замером времени операций
 
 <img width="2099" height="1311" alt="image" src="https://github.com/user-attachments/assets/482a6bd1-c361-463b-9c0f-af6f7ed1658a" />
+
+## json логи
+<img width="1777" height="402" alt="image" src="https://github.com/user-attachments/assets/e6791b14-94c9-4746-8965-5330c0692793" />
+
