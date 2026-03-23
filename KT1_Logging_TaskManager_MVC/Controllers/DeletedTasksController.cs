@@ -1,6 +1,11 @@
-﻿using KT1_Logging_TaskManager_MVC.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using KT1_Logging_TaskManager_MVC.Models;
 
 namespace KT1_Logging_TaskManager_MVC.Controllers
 {
@@ -18,39 +23,66 @@ namespace KT1_Logging_TaskManager_MVC.Controllers
         // GET: DeletedTasks
         public async Task<IActionResult> Index()
         {
-            _logger.LogDebug("[TRACE] Начало операции Index - получение списка удаленных задач");
+            var sw = Stopwatch.StartNew();
+            _logger.LogDebug("Начало операции: получение списка удаленных задач");
 
-            var tasks = await _context.DeletedTasks
-                .OrderByDescending(t => t.DeletedDate)
-                .ToListAsync();
+            try
+            {
+                var tasks = await _context.DeletedTasks
+                    .OrderByDescending(t => t.DeletedDate)
+                    .ToListAsync();
 
-            _logger.LogInformation("[INFO] Получено {TaskCount} удаленных задач", tasks.Count);
-            _logger.LogDebug("[TRACE] Конец операции Index");
-            return View(tasks);
+                sw.Stop();
+                _logger.LogInformation("Получено {TaskCount} удаленных задач за {ElapsedMs} мс", tasks.Count, sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: получение списка удаленных задач (успешно)");
+                return View(tasks);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                _logger.LogError(ex, "Ошибка при получении списка удаленных задач за {ElapsedMs} мс", sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: получение списка удаленных задач (ошибка)");
+                return View(new List<DeletedTasks>());
+            }
         }
 
         // GET: DeletedTasks/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
-            _logger.LogDebug("[TRACE] Начало операции Details для удаленной задачи ID: {TaskId}", id);
+            var sw = Stopwatch.StartNew();
+            _logger.LogDebug("Начало операции: просмотр деталей удаленной задачи с ID {TaskId}", id);
 
-            if (id == null)
+            try
             {
-                _logger.LogWarning("[WARN] Попытка просмотра деталей удаленной задачи без указания ID");
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    sw.Stop();
+                    _logger.LogWarning("Попытка просмотра деталей удаленной задачи без указания ID (прошло {ElapsedMs} мс)", sw.ElapsedMilliseconds);
+                    return NotFound();
+                }
 
-            var deletedTask = await _context.DeletedTasks
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (deletedTask == null)
+                var deletedTask = await _context.DeletedTasks
+                    .FirstOrDefaultAsync(m => m.Id == id);
+
+                if (deletedTask == null)
+                {
+                    sw.Stop();
+                    _logger.LogError("Удаленная задача с ID {TaskId} не найдена (прошло {ElapsedMs} мс)", id, sw.ElapsedMilliseconds);
+                    return NotFound();
+                }
+
+                sw.Stop();
+                _logger.LogInformation("Просмотр деталей удаленной задачи \"{TaskName}\" за {ElapsedMs} мс", deletedTask.TaskName, sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: просмотр деталей удаленной задачи (успешно)");
+                return View(deletedTask);
+            }
+            catch (Exception ex)
             {
-                _logger.LogError("[ERROR] Удаленная задача с ID {TaskId} не найдена", id);
-                return NotFound();
+                sw.Stop();
+                _logger.LogError(ex, "Ошибка при просмотре деталей удаленной задачи за {ElapsedMs} мс", sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: просмотр деталей удаленной задачи (ошибка)");
+                throw;
             }
-
-            _logger.LogInformation("[INFO] Просмотр деталей удаленной задачи: \"{TaskName}\"", deletedTask.TaskName);
-            _logger.LogDebug("[TRACE] Конец операции Details");
-            return View(deletedTask);
         }
 
         // POST: DeletedTasks/Delete/5
@@ -58,23 +90,36 @@ namespace KT1_Logging_TaskManager_MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            _logger.LogDebug("[TRACE] Начало операции Delete для удаленной задачи ID: {TaskId}", id);
+            var sw = Stopwatch.StartNew();
+            _logger.LogDebug("Начало операции: окончательное удаление задачи с ID {TaskId} из корзины", id);
 
-            var deletedTask = await _context.DeletedTasks.FindAsync(id);
-            if (deletedTask != null)
+            try
             {
-                _context.DeletedTasks.Remove(deletedTask);
-                await _context.SaveChangesAsync();
+                var deletedTask = await _context.DeletedTasks.FindAsync(id);
+                if (deletedTask != null)
+                {
+                    _context.DeletedTasks.Remove(deletedTask);
+                    await _context.SaveChangesAsync();
 
-                var remainingCount = await _context.DeletedTasks.CountAsync();
-                _logger.LogInformation("[INFO] Удаленная задача \"{TaskName}\" окончательно удалена", deletedTask.TaskName);
-                _logger.LogInformation("[INFO] Теперь удаленных задач: {RemainingCount}", remainingCount);
-                _logger.LogDebug("[TRACE] Конец операции Delete - успешно");
+                    var remainingCount = await _context.DeletedTasks.CountAsync();
+                    sw.Stop();
+                    _logger.LogInformation("Удаленная задача \"{TaskName}\" окончательно удалена за {ElapsedMs} мс. Теперь удаленных задач: {RemainingCount}",
+                        deletedTask.TaskName, sw.ElapsedMilliseconds, remainingCount);
+                    _logger.LogDebug("Окончание операции: окончательное удаление задачи (успешно)");
+                }
+                else
+                {
+                    sw.Stop();
+                    _logger.LogError("Удаленная задача с ID {TaskId} не найдена для полного удаления (прошло {ElapsedMs} мс)", id, sw.ElapsedMilliseconds);
+                    _logger.LogDebug("Окончание операции: окончательное удаление задачи (задача не найдена)");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogError("[ERROR] Удаленная задача с ID {TaskId} не найдена для полного удаления", id);
-                _logger.LogDebug("[TRACE] Конец операции Delete - задача не найдена");
+                sw.Stop();
+                _logger.LogError(ex, "Ошибка при окончательном удалении задачи за {ElapsedMs} мс", sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: окончательное удаление задачи (ошибка)");
+                throw;
             }
 
             return RedirectToAction(nameof(Index));
@@ -85,21 +130,34 @@ namespace KT1_Logging_TaskManager_MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ClearAll()
         {
-            _logger.LogDebug("[TRACE] Начало операции ClearAll - очистка всех удаленных задач");
+            var sw = Stopwatch.StartNew();
+            _logger.LogDebug("Начало операции: очистка всех удаленных задач");
 
-            var allTasks = await _context.DeletedTasks.ToListAsync();
-            if (allTasks.Any())
+            try
             {
-                _context.DeletedTasks.RemoveRange(allTasks);
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("[INFO] Очищены все удаленные задачи. Удалено: {TaskCount} задач", allTasks.Count);
+                var allTasks = await _context.DeletedTasks.ToListAsync();
+                if (allTasks.Any())
+                {
+                    _context.DeletedTasks.RemoveRange(allTasks);
+                    await _context.SaveChangesAsync();
+                    sw.Stop();
+                    _logger.LogInformation("Очищены все удаленные задачи. Удалено {TaskCount} задач за {ElapsedMs} мс", allTasks.Count, sw.ElapsedMilliseconds);
+                }
+                else
+                {
+                    sw.Stop();
+                    _logger.LogWarning("Попытка очистки списка удаленных задач, но он пуст (прошло {ElapsedMs} мс)", sw.ElapsedMilliseconds);
+                }
+                _logger.LogDebug("Окончание операции: очистка всех удаленных задач (успешно)");
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogWarning("[WARN] Попытка очистки списка удаленных задач, но он пуст");
+                sw.Stop();
+                _logger.LogError(ex, "Ошибка при очистке удаленных задач за {ElapsedMs} мс", sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: очистка всех удаленных задач (ошибка)");
+                throw;
             }
 
-            _logger.LogDebug("[TRACE] Конец операции ClearAll");
             return RedirectToAction(nameof(Index));
         }
     }

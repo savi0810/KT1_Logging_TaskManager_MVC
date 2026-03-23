@@ -9,14 +9,11 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .CreateLogger();
 
-
 try
 {
-    Log.Information("[INFO] Приложение запускается...");
+    Log.Information("Приложение запускается...");
 
-    // Add services to the container.
     builder.Services.AddControllersWithViews();
-
     builder.Host.UseSerilog();
 
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -24,44 +21,39 @@ try
 
     var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Home/Error");
-        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
     }
 
     app.UseHttpsRedirection();
+    app.UseStaticFiles();
     app.UseRouting();
-
     app.UseAuthorization();
-
-    app.MapStaticAssets();
 
     app.UseExceptionHandler(errorApp =>
     {
         errorApp.Run(async context =>
         {
             context.Response.StatusCode = 500;
-            Log.Error("[ERROR] Необработанное исключение в приложении");
-            await context.Response.WriteAsync("Произошла ошибка. Пожалуйста, попробуйте ещё.");
+            Log.Error("Необработанное исключение в приложении");
+            await context.Response.WriteAsync("Произошла ошибка. Пожалуйста, попробуйте позже.");
         });
     });
 
     app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=CurrentTasks}/{action=Index}/{id?}")
-        .WithStaticAssets();
+        pattern: "{controller=CurrentTasks}/{action=Index}/{id?}");
+
+    Log.Information("Конвейер приложения настроен");
 
     app.Run();
 }
-
 catch (Exception ex)
 {
-    Log.Fatal(ex, "[CRITICAL] Критическая ошибка при запуске приложения");
+    Log.Fatal(ex, "Критическая ошибка при запуске приложения");
 }
-
 finally
 {
     Log.CloseAndFlush();

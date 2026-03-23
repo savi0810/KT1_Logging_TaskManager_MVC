@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using KT1_Logging_TaskManager_MVC;
 using KT1_Logging_TaskManager_MVC.Models;
 
 namespace KT1_Logging_TaskManager_MVC.Controllers
@@ -24,39 +23,66 @@ namespace KT1_Logging_TaskManager_MVC.Controllers
         // GET: CompletedTasks
         public async Task<IActionResult> Index()
         {
-            _logger.LogDebug("[TRACE] Начало операции Index - получение списка завершенных задач");
+            var sw = Stopwatch.StartNew();
+            _logger.LogDebug("Начало операции: получение списка завершенных задач");
 
-            var tasks = await _context.CompletedTasks
-                            .OrderByDescending(t => t.CompletedDate)
-                            .ToListAsync();
+            try
+            {
+                var tasks = await _context.CompletedTasks
+                    .OrderByDescending(t => t.CompletedDate)
+                    .ToListAsync();
 
-            _logger.LogInformation("[INFO] Получено {TaskCount} завершенных задач", tasks.Count);
-            _logger.LogDebug("[TRACE] Конец операции Index");
-            return View(tasks);
+                sw.Stop();
+                _logger.LogInformation("Получено {TaskCount} завершенных задач за {ElapsedMs} мс", tasks.Count, sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: получение списка завершенных задач (успешно)");
+                return View(tasks);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                _logger.LogError(ex, "Ошибка при получении списка завершенных задач за {ElapsedMs} мс", sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: получение списка завершенных задач (ошибка)");
+                return View(new List<CompletedTasks>());
+            }
         }
 
         // GET: CompletedTasks/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
-            _logger.LogDebug("[TRACE] Начало операции Details для завершенной задачи ID: {TaskId}", id);
+            var sw = Stopwatch.StartNew();
+            _logger.LogDebug("Начало операции: просмотр деталей завершенной задачи с ID {TaskId}", id);
 
-            if (id == null)
+            try
             {
-                _logger.LogWarning("[WARN] Попытка просмотра деталей завершенной задачи без указания ID");
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    sw.Stop();
+                    _logger.LogWarning("Попытка просмотра деталей завершенной задачи без указания ID (прошло {ElapsedMs} мс)", sw.ElapsedMilliseconds);
+                    return NotFound();
+                }
 
-            var completedTasks = await _context.CompletedTasks
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (completedTasks == null)
+                var completedTasks = await _context.CompletedTasks
+                    .FirstOrDefaultAsync(m => m.Id == id);
+
+                if (completedTasks == null)
+                {
+                    sw.Stop();
+                    _logger.LogError("Завершенная задача с ID {TaskId} не найдена (прошло {ElapsedMs} мс)", id, sw.ElapsedMilliseconds);
+                    return NotFound();
+                }
+
+                sw.Stop();
+                _logger.LogInformation("Просмотр деталей завершенной задачи \"{TaskName}\" за {ElapsedMs} мс", completedTasks.TaskName, sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: просмотр деталей завершенной задачи (успешно)");
+                return View(completedTasks);
+            }
+            catch (Exception ex)
             {
-                _logger.LogError("[ERROR] Завершенная задача с ID {TaskId} не найдена", id);
-                return NotFound();
+                sw.Stop();
+                _logger.LogError(ex, "Ошибка при просмотре деталей завершенной задачи за {ElapsedMs} мс", sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: просмотр деталей завершенной задачи (ошибка)");
+                throw;
             }
-
-            _logger.LogInformation("[INFO] Просмотр деталей завершенной задачи: \"{TaskName}\"", completedTasks.TaskName);
-            _logger.LogDebug("[TRACE] Конец операции Details");
-            return View(completedTasks);
         }
 
         // POST: CompletedTasks/Delete/5
@@ -64,47 +90,74 @@ namespace KT1_Logging_TaskManager_MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            _logger.LogDebug("[TRACE] Начало операции Delete для завершенной задачи ID: {TaskId}", id);
+            var sw = Stopwatch.StartNew();
+            _logger.LogDebug("Начало операции: удаление завершенной задачи с ID {TaskId}", id);
 
-            var completedTasks = await _context.CompletedTasks.FindAsync(id);
-            if (completedTasks != null)
+            try
             {
-                _context.CompletedTasks.Remove(completedTasks);
-                await _context.SaveChangesAsync();
+                var completedTasks = await _context.CompletedTasks.FindAsync(id);
+                if (completedTasks != null)
+                {
+                    _context.CompletedTasks.Remove(completedTasks);
+                    await _context.SaveChangesAsync();
 
-                var remainingCount = await _context.CompletedTasks.CountAsync();
-                _logger.LogInformation("[INFO] Завершенная задача \"{TaskName}\" удалена", completedTasks.TaskName);
-                _logger.LogInformation("[INFO] Теперь завершенных задач: {RemainingCount}", remainingCount);
-                _logger.LogDebug("[TRACE] Конец операции Delete - успешно");
+                    var remainingCount = await _context.CompletedTasks.CountAsync();
+                    sw.Stop();
+                    _logger.LogInformation("Завершенная задача \"{TaskName}\" удалена за {ElapsedMs} мс. Теперь завершенных задач: {RemainingCount}",
+                        completedTasks.TaskName, sw.ElapsedMilliseconds, remainingCount);
+                    _logger.LogDebug("Окончание операции: удаление завершенной задачи (успешно)");
+                }
+                else
+                {
+                    sw.Stop();
+                    _logger.LogError("Завершенная задача с ID {TaskId} не найдена для удаления (прошло {ElapsedMs} мс)", id, sw.ElapsedMilliseconds);
+                    _logger.LogDebug("Окончание операции: удаление завершенной задачи (задача не найдена)");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogError("[ERROR] Завершенная задача с ID {TaskId} не найдена для удаления", id);
-                _logger.LogDebug("[TRACE] Конец операции Delete - задача не найдена");
+                sw.Stop();
+                _logger.LogError(ex, "Ошибка при удалении завершенной задачи за {ElapsedMs} мс", sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: удаление завершенной задачи (ошибка)");
+                throw;
             }
 
             return RedirectToAction(nameof(Index));
         }
 
+        // POST: CompletedTasks/ClearAll
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ClearAll()
         {
-            _logger.LogDebug("[TRACE] Начало операции ClearAll - очистка всех завершенных задач");
+            var sw = Stopwatch.StartNew();
+            _logger.LogDebug("Начало операции: очистка всех завершенных задач");
 
-            var allTasks = await _context.CompletedTasks.ToListAsync();
-            if (allTasks.Any())
+            try
             {
-                _context.CompletedTasks.RemoveRange(allTasks);
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("[INFO] Очищены все завершенные задачи. Удалено: {TaskCount} задач", allTasks.Count);
+                var allTasks = await _context.CompletedTasks.ToListAsync();
+                if (allTasks.Any())
+                {
+                    _context.CompletedTasks.RemoveRange(allTasks);
+                    await _context.SaveChangesAsync();
+                    sw.Stop();
+                    _logger.LogInformation("Очищены все завершенные задачи. Удалено {TaskCount} задач за {ElapsedMs} мс", allTasks.Count, sw.ElapsedMilliseconds);
+                }
+                else
+                {
+                    sw.Stop();
+                    _logger.LogWarning("Попытка очистки списка завершенных задач, но он пуст (прошло {ElapsedMs} мс)", sw.ElapsedMilliseconds);
+                }
+                _logger.LogDebug("Окончание операции: очистка всех завершенных задач (успешно)");
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogWarning("[WARN] Попытка очистки списка завершенных задач, но он пуст");
+                sw.Stop();
+                _logger.LogError(ex, "Ошибка при очистке завершенных задач за {ElapsedMs} мс", sw.ElapsedMilliseconds);
+                _logger.LogDebug("Окончание операции: очистка всех завершенных задач (ошибка)");
+                throw;
             }
 
-            _logger.LogDebug("[TRACE] Конец операции ClearAll");
             return RedirectToAction(nameof(Index));
         }
     }
